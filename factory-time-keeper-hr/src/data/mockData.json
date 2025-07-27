@@ -1,0 +1,130 @@
+
+{
+  "workers": [
+    {
+      "id": "W001",
+      "name": "Rajesh Kumar",
+      "department": "Assembly",
+      "shift": "Morning",
+      "joinDate": "2023-01-15",
+      "photo": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
+      "hourlyRate": 150,
+      "status": "active"
+    },
+    {
+      "id": "W002", 
+      "name": "Priya Sharma",
+      "department": "Quality Control",
+      "shift": "Evening",
+      "joinDate": "2023-02-20",
+      "photo": "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face",
+      "hourlyRate": 160,
+      "status": "active"
+    },
+    {
+      "id": "W003",
+      "name": "Amit Singh",
+      "department": "Packaging",
+      "shift": "Night",
+      "joinDate": "2022-11-10",
+      "photo": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
+      "hourlyRate": 140,
+      "status": "active"
+    },
+    {
+      "id": "W004",
+      "name": "Sunita Devi",
+      "department": "Assembly",
+      "shift": "Morning",
+      "joinDate": "2023-03-05",
+      "photo": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
+      "hourlyRate": 155,
+      "status": "active"
+    }
+  ],
+  "attendance": [
+    {
+      "workerId": "W001",
+      "date": "2024-06-01",
+      "entries": [
+        { "type": "in", "time": "08:00", "camera": "entrance" },
+        { "type": "out", "time": "12:00", "camera": "exit", "reason": "lunch_break" },
+        { "type": "in", "time": "13:00", "camera": "entrance" },
+        { "type": "out", "time": "17:00", "camera": "exit" }
+      ],
+      "totalWorkingHours": 8,
+      "status": "present",
+      "notes": ""
+    },
+    {
+      "workerId": "W001", 
+      "date": "2024-06-02",
+      "entries": [
+        { "type": "in", "time": "08:15", "camera": "entrance" },
+        { "type": "out", "time": "10:30", "camera": "exit", "reason": "personal_break" },
+        { "type": "in", "time": "10:45", "camera": "entrance" },
+        { "type": "out", "time": "12:00", "camera": "exit", "reason": "lunch_break" },
+        { "type": "in", "time": "13:00", "camera": "entrance" },
+        { "type": "out", "time": "16:45", "camera": "exit" }
+      ],
+      "totalWorkingHours": 7.5,
+      "status": "present",
+      "notes": "Late arrival"
+    },
+    {
+      "workerId": "W002",
+      "date": "2024-06-01",
+      "entries": [
+        { "type": "in", "time": "16:00", "camera": "entrance" },
+        { "type": "out", "time": "20:00", "camera": "exit", "reason": "dinner_break" },
+        { "type": "in", "time": "20:30", "camera": "entrance" },
+        { "type": "out", "time": "00:00", "camera": "exit" }
+      ],
+      "totalWorkingHours": 8,
+      "status": "present", 
+      "notes": ""
+    },
+    {
+      "workerId": "W003",
+      "date": "2024-06-01",
+      "entries": [],
+      "totalWorkingHours": 0,
+      "status": "absent",
+      "notes": "Sick leave"
+    }
+  ],
+  "salaryReviews": [
+    {
+      "workerId": "W001",
+      "month": "2024-06",
+      "totalWorkingDays": 26,
+      "presentDays": 24, 
+      "absentDays": 2,
+      "halfDays": 1,
+      "totalHours": 188,
+      "expectedHours": 208,
+      "baseSalary": 28200,
+      "calculatedSalary": 26250,
+      "hrNotes": "Good performance overall",
+      "status": "pending",
+      "reviewedBy": "",
+      "reviewDate": ""
+    },
+    {
+      "workerId": "W002",
+      "month": "2024-06", 
+      "totalWorkingDays": 26,
+      "presentDays": 26,
+      "absentDays": 0,
+      "halfDays": 0,
+      "totalHours": 208,
+      "expectedHours": 208,
+      "baseSalary": 33280,
+      "calculatedSalary": 33280,
+      "hrNotes": "Perfect attendance",
+      "status": "approved",
+      "reviewedBy": "HR Manager",
+      "reviewDate": "2024-07-01"
+    }
+  ]
+}

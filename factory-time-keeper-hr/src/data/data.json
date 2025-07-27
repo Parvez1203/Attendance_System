@@ -1,0 +1,391 @@
+
+{
+  "users": [
+    {
+      "user_id": "user_001",
+      "email": "admin@company.com",
+      "password_hash": "$2b$10$example_hash",
+      "full_name": "Admin User"
+    },
+    {
+      "user_id": "user_002", 
+      "email": "hr@company.com",
+      "password_hash": "$2b$10$example_hash2",
+      "full_name": "HR Manager"
+    }
+  ],
+  "employees": [
+    {
+      "employee_id": "emp_001",
+      "employee_code": "EMP001",
+      "employee_name": "John Smith",
+      "dept": "Engineering",
+      "job_role": "Software Developer",
+      "monthly_salary": 75000,
+      "shift_in": "09:00",
+      "shift_out": "18:00",
+      "joining_date": "2023-01-15",
+      "phone": "+1234567890",
+      "photo": null,
+      "status": "active"
+    },
+    {
+      "employee_id": "emp_002",
+      "employee_code": "EMP002", 
+      "employee_name": "Sarah Johnson",
+      "dept": "Marketing",
+      "job_role": "Marketing Manager",
+      "monthly_salary": 65000,
+      "shift_in": "09:00",
+      "shift_out": "18:00",
+      "joining_date": "2023-02-01",
+      "phone": "+1234567891",
+      "photo": null,
+      "status": "active"
+    },
+    {
+      "employee_id": "emp_003",
+      "employee_code": "EMP003",
+      "employee_name": "Mike Davis",
+      "dept": "Engineering",
+      "job_role": "Senior Developer",
+      "monthly_salary": 85000,
+      "shift_in": "09:00",
+      "shift_out": "18:00",
+      "joining_date": "2022-11-10",
+      "phone": "+1234567892",
+      "photo": null,
+      "status": "active"
+    },
+    {
+      "employee_id": "emp_004",
+      "employee_code": "EMP004",
+      "employee_name": "Lisa Chen",
+      "dept": "HR",
+      "job_role": "HR Specialist",
+      "monthly_salary": 55000,
+      "shift_in": "08:30",
+      "shift_out": "17:30",
+      "joining_date": "2023-03-20",
+      "phone": "+1234567893",
+      "photo": null,
+      "status": "active"
+    },
+    {
+      "employee_id": "emp_005",
+      "employee_code": "EMP005",
+      "employee_name": "David Wilson",
+      "dept": "Sales",
+      "job_role": "Sales Executive",
+      "monthly_salary": 60000,
+      "shift_in": "09:00",
+      "shift_out": "18:00",
+      "joining_date": "2023-04-10",
+      "phone": "+1234567894",
+      "photo": null,
+      "status": "active"
+    }
+  ],
+  "in_out_records": [
+    {
+      "record_id": "rec_001",
+      "employee_id": "emp_001",
+      "record_type": "in",
+      "record_time": "2024-01-13T09:05:00Z",
+      "camera_location": "Main Entrance"
+    },
+    {
+      "record_id": "rec_002",
+      "employee_id": "emp_001",
+      "record_type": "out",
+      "record_time": "2024-01-13T12:30:00Z",
+      "camera_location": "Main Entrance"
+    },
+    {
+      "record_id": "rec_003",
+      "employee_id": "emp_001",
+      "record_type": "in",
+      "record_time": "2024-01-13T13:30:00Z",
+      "camera_location": "Main Entrance"
+    },
+    {
+      "record_id": "rec_004",
+      "employee_id": "emp_001",
+      "record_type": "out",
+      "record_time": "2024-01-13T18:15:00Z",
+      "camera_location": "Main Entrance"
+    },
+    {
+      "record_id": "rec_005",
+      "employee_id": "emp_002",
+      "record_type": "in",
+      "record_time": "2024-01-13T08:55:00Z",
+      "camera_location": "Side Entrance"
+    },
+    {
+      "record_id": "rec_006",
+      "employee_id": "emp_002",
+      "record_type": "out",
+      "record_time": "2024-01-13T18:00:00Z",
+      "camera_location": "Side Entrance"
+    },
+    {
+      "record_id": "rec_007",
+      "employee_id": "emp_003",
+      "record_type": "in",
+      "record_time": "2024-01-12T09:30:00Z",
+      "camera_location": "Main Entrance"
+    },
+    {
+      "record_id": "rec_008",
+      "employee_id": "emp_003",
+      "record_type": "out",
+      "record_time": "2024-01-12T18:30:00Z",
+      "camera_location": "Main Entrance"
+    }
+  ],
+  "attendance": [
+    {
+      "record_id": "att_001",
+      "employee_id": "emp_001",
+      "attendance_date": "2024-01-13",
+      "check_in_time": "09:05:00",
+      "check_out_time": "18:15:00",
+      "total_working_hours": 8.5,
+      "status": "present",
+      "admin_remarks": "",
+      "approved_by": null,
+      "approved_at": null
+    },
+    {
+      "record_id": "att_002",
+      "employee_id": "emp_002",
+      "attendance_date": "2024-01-13",
+      "check_in_time": "08:55:00",
+      "check_out_time": "18:00:00",
+      "total_working_hours": 8.75,
+      "status": "present",
+      "admin_remarks": "",
+      "approved_by": null,
+      "approved_at": null
+    },
+    {
+      "record_id": "att_003",
+      "employee_id": "emp_003",
+      "attendance_date": "2024-01-13",
+      "check_in_time": null,
+      "check_out_time": null,
+      "total_working_hours": 0,
+      "status": "absent",
+      "admin_remarks": "Medical leave - Doctor's appointment",
+      "approved_by": "admin@company.com",
+      "approved_at": "2024-01-13T10:00:00Z"
+    },
+    {
+      "record_id": "att_004",
+      "employee_id": "emp_004",
+      "attendance_date": "2024-01-13",
+      "check_in_time": "09:30:00",
+      "check_out_time": "13:30:00",
+      "total_working_hours": 4,
+      "status": "half_day",
+      "admin_remarks": "Personal work - Half day approved",
+      "approved_by": "admin@company.com",
+      "approved_at": "2024-01-13T14:00:00Z"
+    },
+    {
+      "record_id": "att_005",
+      "employee_id": "emp_005",
+      "attendance_date": "2024-01-13",
+      "check_in_time": "09:45:00",
+      "check_out_time": "18:30:00",
+      "total_working_hours": 8.25,
+      "status": "late",
+      "admin_remarks": "Traffic jam - acceptable delay",
+      "approved_by": "admin@company.com",
+      "approved_at": "2024-01-13T10:30:00Z"
+    },
+    {
+      "record_id": "att_006",
+      "employee_id": "emp_001",
+      "attendance_date": "2024-01-12",
+      "check_in_time": "09:00:00",
+      "check_out_time": "18:00:00",
+      "total_working_hours": 8,
+      "status": "present",
+      "admin_remarks": "",
+      "approved_by": null,
+      "approved_at": null
+    },
+    {
+      "record_id": "att_007",
+      "employee_id": "emp_002",
+      "attendance_date": "2024-01-12",
+      "check_in_time": "09:10:00",
+      "check_out_time": "18:15:00",
+      "total_working_hours": 8.25,
+      "status": "late",
+      "admin_remarks": "Minor delay - no action needed",
+      "approved_by": "admin@company.com",
+      "approved_at": "2024-01-12T18:30:00Z"
+    },
+    {
+      "record_id": "att_008",
+      "employee_id": "emp_003",
+      "attendance_date": "2024-01-12",
+      "check_in_time": "09:30:00",
+      "check_out_time": "18:30:00",
+      "total_working_hours": 8.5,
+      "status": "late",
+      "admin_remarks": "",
+      "approved_by": null,
+      "approved_at": null
+    },
+    {
+      "record_id": "att_009",
+      "employee_id": "emp_004",
+      "attendance_date": "2024-01-12",
+      "check_in_time": "08:30:00",
+      "check_out_time": "17:30:00",
+      "total_working_hours": 8,
+      "status": "present",
+      "admin_remarks": "",
+      "approved_by": null,
+      "approved_at": null
+    },
+    {
+      "record_id": "att_010",
+      "employee_id": "emp_005",
+      "attendance_date": "2024-01-12",
+      "check_in_time": null,
+      "check_out_time": null,
+      "total_working_hours": 0,
+      "status": "absent",
+      "admin_remarks": "Sick leave - fever",
+      "approved_by": "admin@company.com",
+      "approved_at": "2024-01-12T09:00:00Z"
+    }
+  ],
+  "reason_requests": [
+    {
+      "request_id": "req_001",
+      "employee_id": "emp_003",
+      "attendance_date": "2024-01-13",
+      "reason": "Medical appointment",
+      "status": "pending",
+      "requested_by": "emp_003",
+      "created_at": "2024-01-13T10:00:00Z"
+    },
+    {
+      "request_id": "req_002",
+      "employee_id": "emp_004",
+      "attendance_date": "2024-01-12",
+      "reason": "Traffic jam",
+      "status": "approved",
+      "requested_by": "emp_004",
+      "created_at": "2024-01-12T09:45:00Z"
+    }
+  ],
+  "salary": [
+    {
+      "salary_id": "sal_001",
+      "employee_id": "emp_001",
+      "salary_month": "2024-01",
+      "total_working_days": 22,
+      "present_days": 20,
+      "absent_days": 1,
+      "half_days": 1,
+      "late_days": 2,
+      "total_hours": 168,
+      "expected_hours": 176,
+      "base_salary": 75000,
+      "calculated_salary": 73500,
+      "deductions": 1500,
+      "bonus": 0,
+      "status": "pending",
+      "admin_remarks": "",
+      "approved_by": null,
+      "approved_at": null
+    },
+    {
+      "salary_id": "sal_002",
+      "employee_id": "emp_002",
+      "salary_month": "2024-01",
+      "total_working_days": 22,
+      "present_days": 21,
+      "absent_days": 0,
+      "half_days": 0,
+      "late_days": 1,
+      "total_hours": 175,
+      "expected_hours": 176,
+      "base_salary": 65000,
+      "calculated_salary": 64500,
+      "deductions": 500,
+      "bonus": 0,
+      "status": "approved",
+      "admin_remarks": "Good performance this month",
+      "approved_by": "admin@company.com",
+      "approved_at": "2024-01-31T15:30:00Z"
+    },
+    {
+      "salary_id": "sal_003",
+      "employee_id": "emp_003",
+      "salary_month": "2024-01",
+      "total_working_days": 22,
+      "present_days": 18,
+      "absent_days": 2,
+      "half_days": 1,
+      "late_days": 3,
+      "total_hours": 152,
+      "expected_hours": 176,
+      "base_salary": 85000,
+      "calculated_salary": 73500,
+      "deductions": 11500,
+      "bonus": 0,
+      "status": "pending",
+      "admin_remarks": "",
+      "approved_by": null,
+      "approved_at": null
+    },
+    {
+      "salary_id": "sal_004",
+      "employee_id": "emp_004",
+      "salary_month": "2024-01",
+      "total_working_days": 22,
+      "present_days": 19,
+      "absent_days": 1,
+      "half_days": 2,
+      "late_days": 1,
+      "total_hours": 160,
+      "expected_hours": 176,
+      "base_salary": 55000,
+      "calculated_salary": 50000,
+      "deductions": 5000,
+      "bonus": 0,
+      "status": "approved",
+      "admin_remarks": "Half days due to personal reasons - approved",
+      "approved_by": "admin@company.com",
+      "approved_at": "2024-01-31T16:00:00Z"
+    },
+    {
+      "salary_id": "sal_005",
+      "employee_id": "emp_005",
+      "salary_month": "2024-01",
+      "total_working_days": 22,
+      "present_days": 20,
+      "absent_days": 2,
+      "half_days": 0,
+      "late_days": 2,
+      "total_hours": 160,
+      "expected_hours": 176,
+      "base_salary": 60000,
+      "calculated_salary": 54500,
+      "deductions": 5500,
+      "bonus": 0,
+      "status": "pending",
+      "admin_remarks": "",
+      "approved_by": null,
+      "approved_at": null
+    }
+  ]
+}
