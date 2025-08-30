@@ -9,7 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Calendar, Download, Search, Filter, Loader2 } from "lucide-react";
 
 const AttendanceReview = () => {
-  const [selectedMonth, setSelectedMonth] = useState("2025-01");
+  const [selectedMonth, setSelectedMonth] = useState(""); // Track selected month
+  const [selectedYear, setSelectedYear] = useState(""); // Track selected year as string
   const [notes, setNotes] = useState({});
   const [statuses, setStatuses] = useState({});
   const [searchTerm, setSearchTerm] = useState("");
@@ -21,14 +22,27 @@ const AttendanceReview = () => {
   const [isLoading, setIsLoading] = useState(true);  // Loader state
   const [error, setError] = useState(null);  // Error state
 
+  // Get the current month and year
+  const currentDate = new Date();
+  const currentMonth = currentDate.getMonth(); // Get current month (0-11)
+  const currentYear = currentDate.getFullYear(); // Get current year
+
+  // Default to the current month and year
+  useEffect(() => {
+    setSelectedYear(currentYear.toString());  // Set default year to current year (string)
+    setSelectedMonth(currentMonth.toString());  // Set default month to current month
+  }, []);
+
   // Fetch review data from the API based on selected month and year
   useEffect(() => {
     const fetchReviewData = async () => {
+      if (!selectedMonth || !selectedYear) return;
+
       setIsLoading(true);
       setError(null);  // Reset error state
       try {
         const response = await fetch(
-          `https://ju57aw1d9g.execute-api.ap-south-1.amazonaws.com/get-monthly-review-list?month=${selectedMonth.split('-')[1]}&year=${selectedMonth.split('-')[0]}`
+          `https://ju57aw1d9g.execute-api.ap-south-1.amazonaws.com/get-monthly-review-list?month=${parseInt(selectedMonth) + 1}&year=${selectedYear}`
         );
         const data = await response.json();
         if (response.ok && data.records) {
@@ -48,7 +62,7 @@ const AttendanceReview = () => {
     };
 
     fetchReviewData();
-  }, [selectedMonth]);
+  }, [selectedMonth, selectedYear]);
 
   // Calculate working hours based on the entries (in/out times)
   const calculateWorkingHours = (entries) => {
@@ -151,27 +165,22 @@ const AttendanceReview = () => {
     document.body.removeChild(link);
   };
 
-  // Generate the month selection options dynamically starting from 2025
-  const generateMonthOptions = () => {
-    const options = [];
-    const startYear = 2025;
-    const currentDate = new Date();
-    const currentYear = currentDate.getFullYear();
-    let year = startYear;
+  // Generate the month options dynamically starting from January to December
+  const months = [
+    "January", "February", "March", "April", "May", "June", 
+    "July", "August", "September", "October", "November", "December"
+  ];
 
-    while (year <= currentYear) {
-      const startMonth = year === startYear ? 1 : 1; // Start from January of the given start year
-      const endMonth = year === currentYear ? currentDate.getMonth() + 1 : 12;
+  // Generate the year options dynamically starting from 2024 (no future years)
+  const generateYearOptions = () => {
+    const currentYear = new Date().getFullYear();
+    const years = [];
 
-      for (let month = startMonth; month <= endMonth; month++) {
-        const monthString = month < 10 ? `0${month}` : `${month}`;
-        options.push(`${year}-${monthString}`);
-      }
-
-      year++;
+    for (let year = 2024; year <= currentYear; year++) {
+      years.push(year);
     }
 
-    return options;
+    return years;
   };
 
   return (
@@ -183,13 +192,23 @@ const AttendanceReview = () => {
             <Download className="h-4 w-4 mr-2" />
             Export CSV
           </Button>
+          <Select value={selectedYear} onValueChange={setSelectedYear}>
+            <SelectTrigger className="w-40 sm:w-48">
+              <SelectValue placeholder="Select Year" />
+            </SelectTrigger>
+            <SelectContent>
+              {generateYearOptions().map(year => (
+                <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           <Select value={selectedMonth} onValueChange={setSelectedMonth}>
             <SelectTrigger className="w-40 sm:w-48">
               <SelectValue placeholder="Select Month" />
             </SelectTrigger>
             <SelectContent>
-              {generateMonthOptions().map(month => (
-                <SelectItem key={month} value={month}>{month}</SelectItem>
+              {months.map((month, index) => (
+                <SelectItem key={month} value={index.toString()}>{month}</SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -282,6 +301,15 @@ const AttendanceReview = () => {
         <Card>
           <CardContent className="p-4 text-center text-red-500">
             <p>{error}</p>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* No Data Message */}
+      {reviewData.length === 0 && !isLoading && !error && (
+        <Card>
+          <CardContent className="p-4 text-center text-gray-500">
+            No records available for this month.
           </CardContent>
         </Card>
       )}

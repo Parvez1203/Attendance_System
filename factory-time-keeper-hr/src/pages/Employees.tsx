@@ -12,17 +12,19 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Plus, Search, Edit } from "lucide-react";
+import { Plus, Search, Edit, Loader2 } from "lucide-react";
 
 const Employees = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedDept, setSelectedDept] = useState("");
   const [employees, setEmployees] = useState([]);
+  const [isLoading, setIsLoading] = useState(true); // Track loading state
 
   // Fetch employee data from the API
   useEffect(() => {
     const fetchEmployees = async () => {
       try {
+        setIsLoading(true); // Set loading to true when starting to fetch
         const response = await fetch(
           "https://ju57aw1d9g.execute-api.ap-south-1.amazonaws.com/get-employees-list"
         );
@@ -42,6 +44,8 @@ const Employees = () => {
         }
       } catch (error) {
         console.error("Error fetching employees:", error);
+      } finally {
+        setIsLoading(false); // Stop loading once data is fetched
       }
     };
 
@@ -65,9 +69,7 @@ const Employees = () => {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Employees</h1>
-          <p className="text-gray-600">
-            Manage employee information and records
-          </p>
+          <p className="text-gray-600">Manage employee information and records</p>
         </div>
         <Link to="/employees/add">
           <Button>
@@ -114,53 +116,64 @@ const Employees = () => {
           <CardTitle>Employee List ({filteredEmployees.length})</CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Code</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead>Department</TableHead>
-                <TableHead>Role</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredEmployees.map((employee) => (
-                <TableRow key={employee.employee_code}>
-                  <TableCell className="font-medium">
-                    {employee.employee_code}
-                  </TableCell>
-                  <TableCell>
-                    <div>
-                      <div className="font-medium">
-                        {employee.employee_name}
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        {employee.phone_number}
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>{employee.employee_dept}</TableCell>
-                  <TableCell>{employee.employee_job_role}</TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={employee.is_active ? "default" : "secondary"}
-                    >
-                      {employee.is_active ? "Active" : "Inactive"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Link to={`/employees/edit/${employee.employee_code}`}>
-                      <Button variant="ghost" size="sm">
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                    </Link>
-                  </TableCell>
+          {/* Show a loader if the data is still loading */}
+          {isLoading ? (
+            <div className="flex justify-center items-center py-4">
+              <Loader2 className="h-6 w-6 animate-spin text-gray-500" />
+            </div>
+          ) : filteredEmployees.length === 0 ? (
+            <div className="text-center text-gray-500 py-4">
+              No employees found.
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Code</TableHead>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Department</TableHead>
+                  <TableHead>Role</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Actions</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {filteredEmployees.map((employee) => (
+                  <TableRow key={employee.employee_code}>
+                    <TableCell className="font-medium">
+                      {employee.employee_code}
+                    </TableCell>
+                    <TableCell>
+                      <div>
+                        <div className="font-medium">
+                          {employee.employee_name}
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          {employee.phone_number}
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>{employee.employee_dept}</TableCell>
+                    <TableCell>{employee.employee_job_role}</TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={employee.is_active ? "default" : "secondary"}
+                      >
+                        {employee.is_active ? "Active" : "Inactive"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Link to={`/employees/edit/${employee.employee_code}`}>
+                        <Button variant="ghost" size="sm">
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                      </Link>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
     </div>
