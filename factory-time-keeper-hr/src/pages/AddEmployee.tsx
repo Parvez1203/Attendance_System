@@ -61,67 +61,76 @@ const AddEmployee = () => {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (!formData.photo) {
-      setPhotoError(true);
-      toast({
-        title: "Photo required",
-        description: "Please upload an employee photo.",
-        variant: "destructive",
-      });
-      return;
+  if (!formData.photo) {
+    setPhotoError(true);
+    toast({
+      title: "Photo required",
+      description: "Please upload an employee photo.",
+      variant: "destructive",
+    });
+    return;
+  }
+
+  setSubmitting(true);
+  try {
+    // Build API payload with your required keys
+    const payload = {
+      employee_code: formData.employee_code,
+      employee_name: formData.employee_name,
+      employee_shift_in_time: toHHMMSS(formData.shift_in),
+      employee_shift_out_time: toHHMMSS(formData.shift_out),
+      employee_dept: formData.dept,
+      employee_job_role: formData.job_role,
+      employee_monthly_salary: parseFloat(formData.monthly_salary || "0"),
+      employee_joining_date: formData.joining_date, // already YYYY-MM-DD
+      image_data: dataUrlToBase64(formData.photo), // base64 string
+      phone_number: formData.phone,
+    };
+
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      // Log response for debugging
+      console.log("Error response from API:", text);
+      throw new Error(
+        `Request failed (${res.status}) ${res.statusText} ${
+          text ? `- ${text}` : ""
+        }`
+      );
     }
 
-    setSubmitting(true);
-    try {
-      // Build API payload with your required keys
-      const payload = {
-        employee_code: formData.employee_code,
-        employee_name: formData.employee_name,
-        employee_shift_in_time: toHHMMSS(formData.shift_in),
-        employee_shift_out_time: toHHMMSS(formData.shift_out),
-        employee_dept: formData.dept,
-        employee_job_role: formData.job_role,
-        employee_monthly_salary: parseFloat(formData.monthly_salary || "0"),
-        employee_joining_date: formData.joining_date, // already YYYY-MM-DD
-        image_data: dataUrlToBase64(formData.photo), // base64 string
-        phone_number: formData.phone,
-      };
+    toast({
+      title: "Employee saved",
+      description: `${formData.employee_name} has been registered.`,
+    });
+    navigate("/employees");
+  } catch (err: any) {
+    console.error("Employee register failed:", err); // Log error
 
-      const res = await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      if (!res.ok) {
-        const text = await res.text().catch(() => "");
-        throw new Error(
-          `Request failed (${res.status}) ${res.statusText} ${
-            text ? `- ${text}` : ""
-          }`
-        );
-      }
-
-      toast({
-        title: "Employee saved",
-        description: `${formData.employee_name} has been registered.`,
-      });
-      navigate("/employees");
-    } catch (err: any) {
-      console.error("Employee register failed:", err);
-      toast({
-        title: "Failed to save",
-        description:
-          err?.message ??
-          "Something went wrong while saving the employee record.",
-        variant: "destructive",
-      });
-    } finally {
-      setSubmitting(false);
+    // Check if the error message is in expected format
+    if (err.message) {
+      console.log("Caught error message:", err.message); // Log error message
     }
-  };
+
+    // toast({
+    //   title: "Failed to save",
+    //   description:
+    //     err?.message ?? "Something went wrong while saving the employee record.",
+    //   variant: "destructive",
+    // });
+    alert("Operation Failed! Make sure Employee Code is unique.");
+  } finally {
+    setSubmitting(false);
+  }
+};
+
 
   return (
     <div className="space-y-6">

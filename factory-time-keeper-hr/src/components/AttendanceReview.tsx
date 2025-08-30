@@ -1,5 +1,4 @@
-
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -7,18 +6,51 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { Calendar, Clock, Download, Search, Filter } from "lucide-react";
-import mockData from "@/data/mockData.json";
+import { Calendar, Download, Search, Filter, Loader2 } from "lucide-react";
 
 const AttendanceReview = () => {
-  const [selectedMonth, setSelectedMonth] = useState("2024-06");
+  const [selectedMonth, setSelectedMonth] = useState("2025-01");
   const [notes, setNotes] = useState({});
   const [statuses, setStatuses] = useState({});
   const [searchTerm, setSearchTerm] = useState("");
   const [departmentFilter, setDepartmentFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortBy, setSortBy] = useState("name");
+  const [reviewData, setReviewData] = useState([]);
+  const [departments, setDepartments] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);  // Loader state
+  const [error, setError] = useState(null);  // Error state
 
+  // Fetch review data from the API based on selected month and year
+  useEffect(() => {
+    const fetchReviewData = async () => {
+      setIsLoading(true);
+      setError(null);  // Reset error state
+      try {
+        const response = await fetch(
+          `https://ju57aw1d9g.execute-api.ap-south-1.amazonaws.com/get-monthly-review-list?month=${selectedMonth.split('-')[1]}&year=${selectedMonth.split('-')[0]}`
+        );
+        const data = await response.json();
+        if (response.ok && data.records) {
+          setReviewData(data.records);
+
+          // Extract departments dynamically
+          const deptSet = new Set(data.records.map(record => record.employee_dept));
+          setDepartments(Array.from(deptSet));
+        } else {
+          setError("Failed to fetch review data");
+        }
+      } catch (error) {
+        setError("Error fetching review data");
+      } finally {
+        setIsLoading(false);  // Stop loading when fetch is complete
+      }
+    };
+
+    fetchReviewData();
+  }, [selectedMonth]);
+
+  // Calculate working hours based on the entries (in/out times)
   const calculateWorkingHours = (entries) => {
     let totalMinutes = 0;
     let lastInTime = null;
@@ -38,24 +70,23 @@ const AttendanceReview = () => {
     return (totalMinutes / 60).toFixed(1);
   };
 
+  // Filter and sort data based on the applied filters
   const attendanceData = useMemo(() => {
-    const baseData = mockData.attendance.map(att => {
-      const worker = mockData.workers.find(w => w.id === att.workerId);
-      const calculatedHours = calculateWorkingHours(att.entries);
+    const baseData = reviewData.map(att => {
+      const calculatedHours = calculateWorkingHours(att.entry_log);
       
       return { 
         ...att, 
-        workerName: worker?.name || "Unknown", 
-        department: worker?.department || "Unknown",
-        calculatedHours: calculatedHours
+        calculatedHours,
       };
     });
 
     // Apply filters
     let filteredData = baseData.filter(record => {
-      const matchesSearch = record.workerName.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesDepartment = departmentFilter === "all" || record.department === departmentFilter;
-      const currentStatus = statuses[`${record.workerId}-${record.date}`] || "";
+      const matchesSearch = record.employee_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                            record.employee_code.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesDepartment = departmentFilter === "all" || record.employee_dept === departmentFilter;
+      const currentStatus = statuses[`${record.employee_code}-${record.date}`] || "";
       const matchesStatus = statusFilter === "all" || 
         (statusFilter === "unselected" && !currentStatus) ||
         currentStatus === statusFilter;
@@ -67,9 +98,9 @@ const AttendanceReview = () => {
     filteredData.sort((a, b) => {
       switch (sortBy) {
         case "name":
-          return a.workerName.localeCompare(b.workerName);
+          return a.employee_name.localeCompare(b.employee_name);
         case "department":
-          return a.department.localeCompare(b.department);
+          return a.employee_dept.localeCompare(b.employee_dept);
         case "date":
           return new Date(a.date).getTime() - new Date(b.date).getTime();
         case "hours":
@@ -80,10 +111,9 @@ const AttendanceReview = () => {
     });
 
     return filteredData;
-  }, [searchTerm, departmentFilter, statusFilter, sortBy, statuses]);
+  }, [searchTerm, departmentFilter, statusFilter, sortBy, statuses, reviewData]);
 
-  const departments = [...new Set(mockData.workers.map(w => w.department))];
-
+  // Handle status change for a particular employee's record
   const handleStatusChange = (recordId, newStatus) => {
     setStatuses(prev => ({
       ...prev,
@@ -91,17 +121,19 @@ const AttendanceReview = () => {
     }));
   };
 
+  // Export attendance data to CSV
   const exportToCSV = () => {
-    const headers = ['Worker', 'Department', 'Date', 'Check In', 'Check Out', 'Total Hours', 'Status', 'Notes'];
+    const headers = ['Employee Code', 'Employee Name', 'Department', 'Date', 'Check In', 'Check Out', 'Total Hours', 'Status', 'Notes'];
     const csvData = attendanceData.map(record => [
-      record.workerName,
-      record.department,
+      record.employee_code,
+      record.employee_name,
+      record.employee_dept,
       record.date,
-      record.entries.find(e => e.type === 'in')?.time || '',
-      record.entries.find(e => e.type === 'out')?.time || '',
+      record.entry_log.find(e => e.type === 'in')?.time || '',
+      record.entry_log.find(e => e.type === 'out')?.time || '',
       record.calculatedHours + 'h',
-      statuses[`${record.workerId}-${record.date}`] || 'Unselected',
-      notes[`${record.workerId}-${record.date}`] || record.notes || ''
+      statuses[`${record.employee_code}-${record.date}`] || 'Unselected',
+      notes[`${record.employee_code}-${record.date}`] || ''
     ]);
 
     const csvContent = [headers, ...csvData]
@@ -119,6 +151,29 @@ const AttendanceReview = () => {
     document.body.removeChild(link);
   };
 
+  // Generate the month selection options dynamically starting from 2025
+  const generateMonthOptions = () => {
+    const options = [];
+    const startYear = 2025;
+    const currentDate = new Date();
+    const currentYear = currentDate.getFullYear();
+    let year = startYear;
+
+    while (year <= currentYear) {
+      const startMonth = year === startYear ? 1 : 1; // Start from January of the given start year
+      const endMonth = year === currentYear ? currentDate.getMonth() + 1 : 12;
+
+      for (let month = startMonth; month <= endMonth; month++) {
+        const monthString = month < 10 ? `0${month}` : `${month}`;
+        options.push(`${year}-${monthString}`);
+      }
+
+      year++;
+    }
+
+    return options;
+  };
+
   return (
     <div className="p-4 md:p-6 space-y-6 max-w-full overflow-x-auto">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -130,12 +185,12 @@ const AttendanceReview = () => {
           </Button>
           <Select value={selectedMonth} onValueChange={setSelectedMonth}>
             <SelectTrigger className="w-40 sm:w-48">
-              <SelectValue placeholder="Select month" />
+              <SelectValue placeholder="Select Month" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="2024-06">June 2024</SelectItem>
-              <SelectItem value="2024-05">May 2024</SelectItem>
-              <SelectItem value="2024-04">April 2024</SelectItem>
+              {generateMonthOptions().map(month => (
+                <SelectItem key={month} value={month}>{month}</SelectItem>
+              ))}
             </SelectContent>
           </Select>
           <Calendar className="h-5 w-5 text-gray-500" />
@@ -215,41 +270,21 @@ const AttendanceReview = () => {
         </CardContent>
       </Card>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      {/* Loading State */}
+      {isLoading && (
+        <div className="flex justify-center items-center py-4">
+          <Loader2 className="h-6 w-6 animate-spin text-gray-500" />
+        </div>
+      )}
+
+      {/* Error State */}
+      {error && (
         <Card>
-          <CardContent className="p-4">
-            <div className="text-xl md:text-2xl font-bold text-green-600">
-              {attendanceData.filter(r => statuses[`${r.workerId}-${r.date}`] === "present").length}
-            </div>
-            <p className="text-xs md:text-sm text-gray-500">Marked Present</p>
+          <CardContent className="p-4 text-center text-red-500">
+            <p>{error}</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="text-xl md:text-2xl font-bold text-red-600">
-              {attendanceData.filter(r => statuses[`${r.workerId}-${r.date}`] === "absent").length}
-            </div>
-            <p className="text-xs md:text-sm text-gray-500">Marked Absent</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="text-xl md:text-2xl font-bold text-yellow-600">
-              {attendanceData.filter(r => statuses[`${r.workerId}-${r.date}`] === "half_day").length}
-            </div>
-            <p className="text-xs md:text-sm text-gray-500">Half Day</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="text-xl md:text-2xl font-bold text-gray-600">
-              {attendanceData.filter(r => !statuses[`${r.workerId}-${r.date}`]).length}
-            </div>
-            <p className="text-xs md:text-sm text-gray-500">Unselected</p>
-          </CardContent>
-        </Card>
-      </div>
+      )}
 
       {/* Attendance Table */}
       <Card>
@@ -257,100 +292,65 @@ const AttendanceReview = () => {
           <CardTitle>Daily Attendance Records ({attendanceData.length} records)</CardTitle>
         </CardHeader>
         <CardContent className="overflow-x-auto">
-          <div className="min-w-full">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="min-w-[120px]">Worker</TableHead>
-                  <TableHead className="min-w-[100px]">Department</TableHead>
-                  <TableHead className="min-w-[100px]">Date</TableHead>
-                  <TableHead className="min-w-[200px]">Entry Log</TableHead>
-                  <TableHead className="min-w-[80px]">Hours</TableHead>
-                  <TableHead className="min-w-[150px]">Status</TableHead>
-                  <TableHead className="min-w-[200px]">Notes</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {attendanceData.map((record, index) => (
-                  <TableRow key={index}>
-                    <TableCell className="font-medium">{record.workerName}</TableCell>
-                    <TableCell>{record.department}</TableCell>
-                    <TableCell>{record.date}</TableCell>
-                    <TableCell>
-                      {record.entries.length > 0 ? (
-                        <div className="space-y-1">
-                          {record.entries.map((entry, entryIndex) => (
-                            <div key={entryIndex} className="flex items-center space-x-2 text-xs">
-                              <span className="font-mono">{entry.time}</span>
-                              <Clock className="h-3 w-3 text-gray-400" />
-                              <span className="text-gray-500">{entry.type === 'in' ? 'In' : 'Out'}</span>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <span className="text-gray-400">No entries</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex flex-col">
-                        <span className="font-semibold">{record.calculatedHours}h</span>
-                        {record.totalWorkingHours !== parseFloat(record.calculatedHours) && (
-                          <span className="text-xs text-gray-500">
-                            (Expected: {record.totalWorkingHours}h)
-                          </span>
-                        )}
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Employee Code</TableHead>
+                <TableHead>Employee Name</TableHead>
+                <TableHead>Department</TableHead>
+                <TableHead>Date</TableHead>
+                <TableHead>Entry Log</TableHead>
+                <TableHead>Hours</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Notes</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {attendanceData.map((record, index) => (
+                <TableRow key={index}>
+                  <TableCell>{record.employee_code}</TableCell>
+                  <TableCell>{record.employee_name}</TableCell>
+                  <TableCell>{record.employee_dept}</TableCell>
+                  <TableCell>{record.date}</TableCell>
+                  <TableCell>
+                    {record.entry_log.map((entry, entryIndex) => (
+                      <div key={entryIndex} className="text-sm">
+                        <span>{entry.time} ({entry.type})</span>
                       </div>
-                    </TableCell>
-                    <TableCell>
-                      <Select
-                        value={statuses[`${record.workerId}-${record.date}`] || ""}
-                        onValueChange={(value) => handleStatusChange(`${record.workerId}-${record.date}`, value)}
-                      >
-                        <SelectTrigger className="w-40">
-                          <SelectValue placeholder="Select status" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="present">Present</SelectItem>
-                          <SelectItem value="half_day">Half Day</SelectItem>
-                          <SelectItem value="absent">Absent</SelectItem>
-                          <SelectItem value="paid_leave">Paid Leave/Holiday</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      {!statuses[`${record.workerId}-${record.date}`] && (
-                        <Badge variant="outline" className="mt-1 text-xs">
-                          Unselected
-                        </Badge>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <Textarea
-                        placeholder="Add notes..."
-                        value={notes[`${record.workerId}-${record.date}`] || record.notes || ''}
-                        onChange={(e) => setNotes({
-                          ...notes,
-                          [`${record.workerId}-${record.date}`]: e.target.value
-                        })}
-                        className="min-h-[60px] text-xs w-full"
-                      />
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Bulk Actions */}
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <p className="text-sm text-gray-600">Review completed for {selectedMonth}</p>
-            <div className="flex space-x-2">
-              <Button variant="outline" size="sm">Save Changes</Button>
-              <Button size="sm">Submit for Salary Processing</Button>
-            </div>
-          </div>
+                    ))}
+                  </TableCell>
+                  <TableCell>{record.calculatedHours} hours</TableCell>
+                  <TableCell>
+                    <Select
+                      value={statuses[`${record.employee_code}-${record.date}`] || ""}
+                      onValueChange={(value) => handleStatusChange(`${record.employee_code}-${record.date}`, value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="present">Present</SelectItem>
+                        <SelectItem value="half_day">Half Day</SelectItem>
+                        <SelectItem value="absent">Absent</SelectItem>
+                        <SelectItem value="paid_leave">Paid Leave/Holiday</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </TableCell>
+                  <TableCell>
+                    <Textarea
+                      placeholder="Add notes..."
+                      value={notes[`${record.employee_code}-${record.date}`] || ''}
+                      onChange={(e) => setNotes({
+                        ...notes,
+                        [`${record.employee_code}-${record.date}`]: e.target.value
+                      })}
+                      className="min-h-[60px]"
+                    />
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </CardContent>
       </Card>
     </div>
